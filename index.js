@@ -2,6 +2,7 @@ const express = require('express');
 require('dotenv').config() 
 const morgan = require("morgan");
 const connectDB = require("./config/db");
+const router = require('./routes/api/signup');
 
 
 
@@ -20,9 +21,13 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 
+app.use('./api', router);
+
+
+
 const PORT = process.env.PORT || 2222;
 
 app.listen(
-	PORT,
+	PORT, ()=>
 	console.log(`Server started in ${process.env.NODE_ENV} at port ${PORT}`)
 );
