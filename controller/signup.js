@@ -3,7 +3,9 @@ const User = require("../models/user");
 const errorResponse = require("../utils/errorRes");
 const successResponse = require("../utils/success");
 
-
+// @desc    Register a company
+// @route   POST /api/signup
+// @access  Public
 const signUp = async(req, res) => {
   const {name, email, bvn, phone, password, confirmPass} =req.body;
 
@@ -73,6 +75,7 @@ const signUp = async(req, res) => {
 			bvn,
 			phone,
 			password,
+			emailConfirmToken: confirmToken,
 		});
     if (newUser) {
       // send mail and return a response
@@ -90,4 +93,28 @@ const signUp = async(req, res) => {
   }
 }
 
-module.exports = signUp;
+
+// @desc    Email confirmation
+// @route   GET /api/confirm_signup/:confirmToken
+// @access  Public
+const confirmEmail = async (req, res) => {
+  const { confirmToken } = req.params;
+  const user = await User.findOne({
+		where: {
+			emailConfirmToken: confirmToken,
+		},
+	});
+  if (user === null) {
+    return errorResponse(400, "Invalid confirmation token", res);
+  }
+  if (user.emai_isVerified) {
+		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+	}
+
+  user.emai_isVerified = true;
+  user.save();
+  res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+  res.status(200)
+};
+
+module.exports ={ signUp, confirmEmail };

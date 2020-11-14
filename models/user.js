@@ -25,6 +25,14 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
+		emailConfirmToken: {
+			type: String,
+			required: true,
+		},
+		emai_isVerified: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true }
 );
