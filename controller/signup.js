@@ -5,11 +5,14 @@ const successResponse = require("../utils/success");
 
 
 const signUp = async(req, res) => {
-  const {name, email, bvn, phone, password} =req.body;
+  const {name, email, bvn, phone, password, confirmPass} =req.body;
 
   try {
     if (!name || !email || !password || !bvn || !phone) {
 			return errorResponse(400, "Please fill all fields", res);
+    }
+    if (password !== confirmPass) {
+      return errorResponse(400, "Password does not match", res);
     }
     const emailRegexp = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 		if (!emailRegexp.test(email)) {
@@ -58,24 +61,22 @@ const signUp = async(req, res) => {
     const signupConfirmUrl = `${req.protocol}://${req.get(
       "host"
     )}/api/confirm_signup/${confirmToken}`;
-
+    // email message
     const message = `Hello ${name},<br><br>To verify your email address (${email}), Please
-        <a href="${signupConfirmUrl}"> Click here</a> OR <br><br> Copy and paste the link below in your browser <br>
-        <a href="${signupConfirmUrl}">${signupConfirmUrl}</a>
-        <br><br>Thank you, <br>REMI`;
+        <a href="${signupConfirmUrl}"> Click here</a> <br>
+        <br><br>Thank you, <br>Loan App`;
     const subject = "Email Confirmation";
 
-    const newCompany = await Company.create({
-      name,
-      email,
-      password,
-      logo,
-      confirm_token: confirmToken,
-      email_verified: false,
-    });
-    if (newCompany) {
+    const newUser = await User.create({
+			name,
+			email,
+			bvn,
+			phone,
+			password,
+		});
+    if (newUser) {
       // send mail and return a response
-      sendEmail("no-reply@remi.com", email, newCompany.name, subject, message);
+      sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
 
       return successResponse(
         201,
