@@ -79,7 +79,7 @@ const signUp = async (req, res) => {
 		});
 		if (newUser) {
 			// send mail and return a response
-			// sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
+			sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
 
 			return successResponse(
 				201,

@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config() 
 const morgan = require("morgan");
 const connectDB = require("./config/db");
-const router = require('./routes/api/signup');
+const router = require('./routes/api/user');
 
 
 
@@ -34,14 +34,14 @@ const server = app.listen(
 
 
 // Handle unhandled promise rejections
-// process.on("unhandledRejection", (err) => {
-//   console.log(`Error: ${err.message}`.red);
-//   // Close server & exit process
-//   server.close(() => process.exit(1));
-// });
+process.on("unhandledRejection", (err) => {
+  console.log(`Error: ${err.message}`.red);
+  // Close server & exit process
+  server.close(() => process.exit(1));
+});
 
-// process
-//   .on('uncaughtException', err => {
-//     console.error(err, 'Uncaught Exception thrown');
-//     process.exit(1);
-//   });
+process
+  .on('uncaughtException', err => {
+    console.error(err, 'Uncaught Exception thrown');
+    process.exit(1);
+  });
