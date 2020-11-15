@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs');
-const jwt  = require('jsonwebtoken');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { Schema } = mongoose;
-
 
 const userSchema = new Schema(
 	{
@@ -20,7 +19,8 @@ const userSchema = new Schema(
 		},
 		password: {
 			type: String,
-			required: true,
+      required: true,
+      maxlength: 255
 		},
 		email: {
 			type: String,
@@ -38,28 +38,24 @@ const userSchema = new Schema(
 	{ timestamps: true }
 );
 
-userSchema.pre('save', async function (next) {
-  try {
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
-    return next();
-    } catch (error) {
-      logger.error("could not hash password ", error);
-      return error;
-    }
-});
-
-
-userSchema.methods.comparePassword = async function(data) {
-  return await bcrypt.compare(data, this.password);
+userSchema.methods.bcryptHash = async function (password) {
+	try {
+		const salt = await bcrypt.genSalt(10);
+		return  await bcrypt.hash(password, salt);
+	} catch (error) {
+		console.error("could not hash password ", error);
+		return error;
+	}
 };
 
-userSchema.methods.getSignedJWT = async function(id) {
-  return await jwt.sign({ id, }, process.env.JWT_SECRET, {
+userSchema.methods.comparePassword = async function (password) {
+	return await bcrypt.compare(password, this.password);
+};
+
+userSchema.methods.getSignedJWT = async function (id) {
+	return await jwt.sign({ id }, process.env.JWT_SECRET, {
 		expiresIn: process.env.JWT_EXPIRE,
 	});
-}
-
-
+};
 
 module.exports = mongoose.model("User", userSchema);

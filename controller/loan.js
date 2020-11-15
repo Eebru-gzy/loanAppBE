@@ -5,25 +5,11 @@ const Loan = require("../models/loan");
 // @desc    user take a loan
 // @route   POST /api/takeloan
 // @access  private
-
 const takeLoan = async (req, res) => {
 	try {
-		const {
-			principalAmount,
-			interestAmount,
-			amountDue,
-			dueDate,
-			loanPeriod,
-		} = req.body;
+		req.body.user = req.user[0]._id;
 
-		const createLoan = await Loan.create({
-			principalAmount,
-			interestAmount,
-			amountDue,
-			dueDate,
-			loanPeriod,
-		});
-		console.log(createLoan);
+		const createLoan = await Loan.create(req.body);
 		successResponse(200, createLoan, res);
 	} catch (error) {
 		console.log(error);
@@ -31,4 +17,17 @@ const takeLoan = async (req, res) => {
 	}
 };
 
-module.exports = takeLoan;
+// @desc    get all user's loan
+// @route   GET /api/loans
+// @access  private
+const getLoans = async (req, res) => {
+	try {
+		const loans = await Loan.find({ user: req.user[0]._id });
+		successResponse(200, loans, res);
+	} catch (error) {
+		console.log(error);
+		return errorResponse(500, "Internal server error", res);
+	}
+};
+
+module.exports = { takeLoan, getLoans };

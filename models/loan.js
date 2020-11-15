@@ -3,10 +3,6 @@ const { Schema } = mongoose;
 
 const loanSchema = new Schema(
 	{
-		user: {
-			type: Schema.Types.ObjectId,
-			ref: "User",
-		},
 		principalAmount: {
 			type: String,
 			required: true,
@@ -31,6 +27,10 @@ const loanSchema = new Schema(
 			type: String,
 			default: "In-progress",
 			enum: ["In-progress", "Settled", "Default"],
+    },
+    user: {
+			type: Schema.Types.ObjectId,
+			ref: "User",
 		},
 		startDate: {
 			type: Date,

@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const User = require("../models/user");
 const errorResponse = require("../utils/errorRes");
@@ -49,14 +50,22 @@ const signUp = async (req, res) => {
 			);
 		}
 
-		const foundUser = await User.findOne({ phone }).exec();
+		const foundUser = await User.findOne({ phone });
 		if (foundUser) {
 			return errorResponse(
 				400,
 				"A user with that phone number already exist. Please login",
 				res
 			);
-    }
+		}
+		const foundUserWithEmail = await User.findOne({ email });
+		if (foundUserWithEmail) {
+			return errorResponse(
+				400,
+				"A user with that email already exist. Please login",
+				res
+			);
+		}
 		// generate confirm token
 		const confirmToken = crypto.randomBytes(10).toString("hex");
 		// Create signup confirmation url
@@ -67,14 +76,17 @@ const signUp = async (req, res) => {
 		const message = `Hello ${name},<br><br>To verify your email address (${email}), Please
         <a href="${signupConfirmUrl}"> Click here</a> <br>
         <br><br>Thank you, <br>Loan App`;
-		const subject = "Email Confirmation";
-
+    const subject = "Email Confirmation";
+    
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(password, salt) 
 		const newUser = await User.create({
 			name,
 			email,
 			bvn,
 			phone,
-			password,
+			password: hashPassword,
 			emailConfirmToken: confirmToken,
 		});
 		if (newUser) {
@@ -106,72 +118,68 @@ const confirmEmail = async (req, res) => {
 		return errorResponse(400, "Invalid confirmation token", res);
 	}
 	if (!user.email_isVerified) {
-    user.email_isVerified = true;
+		user.email_isVerified = true;
 		user.save();
-    res.status(200);
-    res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
-    res.end();
-	}else {
-    res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
-    res.end();
-  }
+		res.status(200);
+		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+		res.end();
+	} else {
+		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+		res.end();
+	}
 };
-
 
 // @desc    Login a user
 // @route   POST /api/login
 // @access  Public
 const Login = async (req, res) => {
 	const { phone, password } = req.body;
-
-  try {
-    if (!phone || !password) {
+	try {
+		if (!phone || !password) {
 			return errorResponse(400, "Please fill all fields.", res);
 		}
 
 		const user = await User.findOne({ phone });
 		if (!user) {
 			return errorResponse(400, `User with phone ${phone} does not exist`, res);
-    }
-    const confirmPass = await user.comparePassword(password)
-		if (!confirmPass) {
-			return errorResponse(400, "Either phone or password is incorrect", res);
-    }
-    if (!user.email_isVerified) {
+		}
+		const confirmPass = await bcrypt.compare(password, user.password);
+		if (!user.email_isVerified) {
 			return errorResponse(
 				400,
 				"Please verify your email. Check your email for verification link.",
 				res
 			);
+    }
+		if (!confirmPass) {
+      return errorResponse(400, "Either password or phone number is incorrect", res);
 		}
-    if (confirmPass) {
+		if (confirmPass) {
 			return sendTokenResponse(200, user, res);
 		}
-  } catch (error) {
-    console.log(error);
-    return errorResponse(500, "Internal server error", res)
-  }
+	} catch (error) {
+		console.log(error);
+		return errorResponse(500, "Internal server error", res);
+	}
 };
-
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = async (statusCode, user, res) => {
-  // Create token
-  const token = await user.getSignedJWT(user._id);
-  
-  const options = {
-    expires: new Date(Date.now() + 3600000),
+	// Create token
+	const token = await user.getSignedJWT(user._id);
+
+	const options = {
+		expires: new Date(Date.now() + 3600000),
 		httpOnly: true,
 	};
-  console.log(options);
-  if (process.env.NODE_ENV === "production") {
-    options.secure = true;
-  }
-  return res.status(statusCode).cookie("token", token, options).json({
-    success: true,
-    token,
-    user: user,
-  });
+	if (process.env.NODE_ENV === "production") {
+		options.secure = true;
+	}
+	return res.status(statusCode).cookie("token", token, options).json({
+		success: true,
+		token,
+		user: user,
+	});
 };
 
 module.exports = { signUp, confirmEmail, Login };
