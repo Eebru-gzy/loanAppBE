@@ -79,7 +79,7 @@ const signUp = async (req, res) => {
 		});
 		if (newUser) {
 			// send mail and return a response
-			sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
+			// sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
 
 			return successResponse(
 				201,
@@ -105,14 +105,16 @@ const confirmEmail = async (req, res) => {
 	if (user === null) {
 		return errorResponse(400, "Invalid confirmation token", res);
 	}
-	if (user.email_isVerified) {
-		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
-	}
-
-	user.email_isVerified = true;
-	user.save();
-	res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
-	res.status(200);
+	if (!user.email_isVerified) {
+    user.email_isVerified = true;
+		user.save();
+    res.status(200);
+    res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+    res.end();
+	}else {
+    res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+    res.end();
+  }
 };
 
 
@@ -135,12 +137,15 @@ const Login = async (req, res) => {
 		if (!confirmPass) {
 			return errorResponse(400, "Either phone or password is incorrect", res);
     }
-    if (!user.email_verified) {
+    if (!user.email_isVerified) {
 			return errorResponse(
 				400,
 				"Please verify your email. Check your email for verification link.",
 				res
 			);
+		}
+    if (confirmPass) {
+			return sendTokenResponse(200, user, res);
 		}
   } catch (error) {
     console.log(error);
@@ -150,20 +155,19 @@ const Login = async (req, res) => {
 
 
 // Get token from model, create cookie and send response
-const sendTokenResponse = (statusCode, user, model, res) => {
+const sendTokenResponse = async (statusCode, user, res) => {
   // Create token
-  const token = model.getSignedJwtToken(user.id);
-
+  const token = await user.getSignedJWT(user._id);
+  
   const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
+    expires: new Date(Date.now() + 3600000),
+		httpOnly: true,
+	};
+  console.log(options);
   if (process.env.NODE_ENV === "production") {
     options.secure = true;
   }
-  res.status(statusCode).cookie("token", token, options).json({
+  return res.status(statusCode).cookie("token", token, options).json({
     success: true,
     token,
     user: user,
