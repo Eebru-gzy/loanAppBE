@@ -29,7 +29,7 @@ const userSchema = new Schema(
 			type: String,
 			required: true,
 		},
-		emai_isVerified: {
+		email_isVerified: {
 			type: Boolean,
 			default: false,
 		},
@@ -49,9 +49,15 @@ userSchema.pre('save', async function (next) {
 });
 
 
-userSchema.methods.comparePassword = async function validatePassword(data) {
-  return bcrypt.compare(data, this.password);
+userSchema.methods.comparePassword = async function(data) {
+  return await bcrypt.compare(data, this.password);
 };
+
+userSchema.methods.getSignedJWT = async function(id) {
+  return jwt.sign({ id, }, process.env.JWT_SECRET, {
+		expiresIn: process.env.JWT_EXPIRE,
+	});
+}
 
 
 

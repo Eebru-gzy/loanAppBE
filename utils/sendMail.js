@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 const sendEmail = async (
 	sender_email,
 	receiver_email,
