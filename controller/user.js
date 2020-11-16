@@ -122,7 +122,7 @@ const confirmEmail = async (req, res) => {
 		user.email_isVerified = true;
 		user.save();
 		res.status(200);
-		res.redirect(`https://needloan.herokuapp.com/changepass`);
+		res.redirect(`https://needloan.herokuapp.com/confirmemail`);
 		res.end();
 	} else {
 		res.redirect(`https://needloan.herokuapp.com/confirmemail`);
