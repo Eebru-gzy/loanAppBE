@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const User = require("../models/user");
+const Loan = require("../models/loan");
 const errorResponse = require("../utils/errorRes");
 const sendEmail = require("../utils/sendMail");
 const successResponse = require("../utils/success");
@@ -121,10 +122,10 @@ const confirmEmail = async (req, res) => {
 		user.email_isVerified = true;
 		user.save();
 		res.status(200);
-		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+		res.redirect(`https://needloan.herokuapp.com/changepass`);
 		res.end();
 	} else {
-		res.redirect(`https://remi-hr-app.herokuapp.com/confirmemail`);
+		res.redirect(`https://needloan.herokuapp.com/confirmemail`);
 		res.end();
 	}
 };
@@ -155,7 +156,10 @@ const Login = async (req, res) => {
       return errorResponse(400, "Either password or phone number is incorrect", res);
 		}
 		if (confirmPass) {
-			return sendTokenResponse(200, user, res);
+      
+    const loans = await Loan.find({ user: user._id });
+		// return successResponse(200, {user, loans}, res);
+			return sendTokenResponse(200, user, res, loans);
 		}
 	} catch (error) {
 		console.log(error);
@@ -164,12 +168,12 @@ const Login = async (req, res) => {
 };
 
 // Get token from model, create cookie and send response
-const sendTokenResponse = async (statusCode, user, res) => {
+const sendTokenResponse = async (statusCode, user, res, loan) => {
 	// Create token
 	const token = await user.getSignedJWT(user._id);
 
 	const options = {
-		expires: new Date(Date.now() + 3600000),
+		expires: new Date(Date.now() + 36000000),
 		httpOnly: true,
 	};
 	if (process.env.NODE_ENV === "production") {
@@ -178,7 +182,8 @@ const sendTokenResponse = async (statusCode, user, res) => {
 	return res.status(statusCode).cookie("token", token, options).json({
 		success: true,
 		token,
-		user: user,
+    user: user,
+    loan
 	});
 };
 

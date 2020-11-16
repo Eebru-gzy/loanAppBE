@@ -43,6 +43,9 @@ if (process.env.NODE_ENV === 'development') {
 
 
 app.use('/api', router);
+app.use('*', (req, res)=>{
+  res.send('Redirect Route');
+});
 
 
 
