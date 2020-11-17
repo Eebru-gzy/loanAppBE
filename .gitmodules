@@ -1,0 +1,3 @@
+[submodule "loanapp"]
+	path = loanapp
+	url = https://github.com/Eebru-gzy/LoanApp.git
