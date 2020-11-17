@@ -13,6 +13,7 @@ const app = express();
 const allowedOrigins = [
 	"http://localhost:3000",
 	"https://needloan.herokuapp.com/",
+	"https://loanappfe.herokuapp.com/",
 ];
 app.use(
 	cors({
