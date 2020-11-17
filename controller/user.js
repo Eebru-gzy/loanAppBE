@@ -10,6 +10,7 @@ const successResponse = require("../utils/success");
 // @route   POST /api/signup
 // @access  Public
 const signUp = async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
 	const { name, email, bvn, phone, password, confirmPass } = req.body;
 
 	try {
@@ -93,6 +94,7 @@ const signUp = async (req, res) => {
 		if (newUser) {
 			// send mail and return a response
 			sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
+
 
 			return successResponse(
 				201,
