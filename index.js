@@ -33,12 +33,12 @@ app.use(
 );
 
 app.use((request, response, next)=> {
-  response.header("Access-Control-Allow-Origin", "*");
-	response.header(
+  response.headers("Access-Control-Allow-Origin", "*");
+	response.headers(
 		"Access-Control-Allow-Headers",
 		"Origin, X-Requested-With,Content-Type, Accept"
 	);
-  response.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  response.headers("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
   next();
 })
 app.use(express.urlencoded({ extended: false }));
