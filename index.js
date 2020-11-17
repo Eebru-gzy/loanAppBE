@@ -15,43 +15,13 @@ const allowedOrigins = [
 	"https://needloan.herokuapp.com/",
 	"https://loanappfe.herokuapp.com/",
 ];
-app.use(
-	cors({
-		origin: function (origin, callback) {
-			// allow requests with no origin
-			// (like mobile apps or curl requests)
-			if (!origin) return callback(null, true);
-			if (allowedOrigins.indexOf(origin) === -1) {
-				var msg =
-					"The CORS policy for this site does not " +
-					"allow access from the specified Origin.";
-				return callback(new Error(msg), false);
-			}
-			return callback(null, true);
-		},
-	})
-);
+app.use(cors());
 
-app.use((request, response, next)=> {
-  response.setHeader("Access-Control-Allow-Origin", "*");
-	response.setHeader(
-		"Access-Control-Allow-Headers",
-		"Origin, X-Requested-With,Content-Type, Accept"
-	);
-  response.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  next();
-})
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-if (process.env.NODE_ENV === "production") {
-	app.use(express.static("loanapp/build"));
-}
-
-//morgan logging in dev
-if (process.env.NODE_ENV === "development") {
-	app.use(morgan("dev"));
-}
+// morgan
+app.use(morgan("dev"));
 
 app.use("/api", router);
 app.use("*", (req, res) => {
