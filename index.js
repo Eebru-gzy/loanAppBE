@@ -24,7 +24,7 @@ app.use(express.json());
 // morgan
 app.use(morgan("dev"));
 
-app.use("/api", router);
+app.use("/api", cors(), router);
 app.use("*", (req, res) => {
 	res.send("Redirect Route");
 });
