@@ -11,11 +11,7 @@ connectDB();
 //initialize express
 const app = express();
 app.options("*", cors());
-// const allowedOrigins = [
-// 	"http://localhost:3000",
-// 	"https://needloan.herokuapp.com/",
-// 	"https://loanappfe.herokuapp.com/",
-// ];
+
 app.use(cors());
 
 app.use(express.urlencoded({ extended: false }));
@@ -26,7 +22,7 @@ app.use(morgan("dev"));
 
 app.use("/api", cors(), router);
 app.use("*", (req, res) => {
-	res.send("Redirect Route");
+	res.send("Working");
 });
 
 const PORT = process.env.PORT || 2222;
