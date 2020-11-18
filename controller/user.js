@@ -11,6 +11,7 @@ const successResponse = require("../utils/success");
 // @access  Public
 const signUp = async (req, res) => {
 	const { name, email, bvn, phone, password, confirmPass } = req.body;
+		console.log(req.body);
 
 	try {
 		if (!name || !email || !password || !bvn || !phone) {
@@ -77,11 +78,11 @@ const signUp = async (req, res) => {
 		const message = `Hello ${name},<br><br>To verify your email address (${email}), Please
         <a href="${signupConfirmUrl}"> Click here</a> <br>
         <br><br>Thank you, <br>Loan App`;
-    const subject = "Email Confirmation";
-    
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashPassword = await bcrypt.hash(password, salt) 
+		const subject = "Email Confirmation";
+
+		// Hash password
+		const salt = await bcrypt.genSalt(10);
+		const hashPassword = await bcrypt.hash(password, salt);
 		const newUser = await User.create({
 			name,
 			email,
@@ -93,7 +94,6 @@ const signUp = async (req, res) => {
 		if (newUser) {
 			// send mail and return a response
 			sendEmail("no-reply@loanapp.com", email, newUser.name, subject, message);
-
 
 			return successResponse(
 				201,
@@ -136,6 +136,7 @@ const confirmEmail = async (req, res) => {
 // @access  Public
 const Login = async (req, res) => {
 	const { phone, password } = req.body;
+	console.log(req.body);
 	try {
 		if (!phone || !password) {
 			return errorResponse(400, "Please fill all fields.", res);
@@ -152,14 +153,17 @@ const Login = async (req, res) => {
 				"Please verify your email. Check your email for verification link.",
 				res
 			);
-    }
+		}
 		if (!confirmPass) {
-      return errorResponse(400, "Either password or phone number is incorrect", res);
+			return errorResponse(
+				400,
+				"Either password or phone number is incorrect",
+				res
+			);
 		}
 		if (confirmPass) {
-      
-    const loans = await Loan.find({ user: user._id });
-		// return successResponse(200, {user, loans}, res);
+			const loans = await Loan.find({ user: user._id });
+			// return successResponse(200, {user, loans}, res);
 			return sendTokenResponse(200, user, res, loans);
 		}
 	} catch (error) {
@@ -183,8 +187,8 @@ const sendTokenResponse = async (statusCode, user, res, loan) => {
 	return res.status(statusCode).cookie("token", token, options).json({
 		success: true,
 		token,
-    user: user,
-    loan
+		user: user,
+		loan,
 	});
 };
 

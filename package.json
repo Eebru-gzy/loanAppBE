@@ -6,7 +6,7 @@
 	"proxy": "https://loanappbe.herokuapp.com",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "concurrently \"npm run server\" \"npm run client\"",
+		"start":  "node index.js",
 		"server": "node index.js",
 		"client": "cd loanapp && yarn start",
 		"dev": "cross-env NODE_ENV=development nodemon app.js"
