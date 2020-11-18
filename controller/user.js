@@ -11,7 +11,7 @@ const successResponse = require("../utils/success");
 // @access  Public
 const signUp = async (req, res) => {
 	const { name, email, bvn, phone, password, confirmPass } = req.body;
-		console.log(req.body);
+	console.log(req.body);
 
 	try {
 		if (!name || !email || !password || !bvn || !phone) {
@@ -123,10 +123,10 @@ const confirmEmail = async (req, res) => {
 		user.email_isVerified = true;
 		user.save();
 		res.status(200);
-		res.redirect(`https://loanappfe.herokuapp.com/changepass`);
+		res.redirect(`https://needloan.netlify.app/changepass`);
 		res.end();
 	} else {
-		res.redirect(`https://loanappfe.herokuapp.com/changepass`);
+		res.redirect(`https://needloan.netlify.app/changepass`);
 		res.end();
 	}
 };
@@ -136,7 +136,7 @@ const confirmEmail = async (req, res) => {
 // @access  Public
 const Login = async (req, res) => {
 	const { phone, password } = req.body;
-	console.log(req.body);
+	
 	try {
 		if (!phone || !password) {
 			return errorResponse(400, "Please fill all fields.", res);
@@ -192,4 +192,20 @@ const sendTokenResponse = async (statusCode, user, res, loan) => {
 	});
 };
 
-module.exports = { signUp, confirmEmail, Login };
+
+// @desc    user save card
+// @route   POST /api/savecard
+// @access  private
+const confirmCard = async (req, res) => {
+	const { reference } = req.body;
+  const user = await User.findOne({ _id: req.user[0]._id });
+	if (!user.reference) {
+		user.reference = reference;
+		user.save();
+		res.status(200);
+		res.end();
+	}else {
+    res.end()
+  }
+};
+module.exports = { signUp, confirmEmail, Login, confirmCard };

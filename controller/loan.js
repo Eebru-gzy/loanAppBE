@@ -30,4 +30,4 @@ const getLoans = async (req, res) => {
 	}
 };
 
-module.exports = { takeLoan, getLoans };
+module.exports = { takeLoan, getLoans, };

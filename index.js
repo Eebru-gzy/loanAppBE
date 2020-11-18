@@ -22,7 +22,7 @@ app.use(morgan("dev"));
 
 app.use("/api", cors(), router);
 app.use("*", (req, res) => {
-	res.send("Working");
+	res.send("You don miss road o");
 });
 
 const PORT = process.env.PORT || 2222;
